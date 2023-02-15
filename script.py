@@ -1,13 +1,13 @@
-import editdistance
+import textdistance
 
 def getlevdistance(schoolname):
     with open('data/schoollist.txt') as f:
         candidates = [line.rstrip('\n') for line in f]
     winner = 999
     for candidate in candidates:
-        diff = int(editdistance.eval(candidate.lower(),schoolname.lower()))
+        diff = float(textdistance.levenshtein.normalized_distance(candidate.lower(),schoolname.lower()))
         if (diff<winner):
-            winner = editdistance.eval(candidate,schoolname)
+            winner = diff
             match = candidate
     return match
 
