@@ -80,24 +80,20 @@ def eval(typos: dict, wordlist: list[str], num_samples: int)->float:
     for item in typos.items():
         count+=1
         output = matching.match_levenshtein(item[0],wordlist)
-        #print('Correct:')
-        #print(str(output))
-        #print('Typo:')
-        #print(str(item[0]))
-        #print('Expected: ')
-        #print(str(item[1]))
+        print(item)
         if (str(output)==str(item[1])):
             print('correct')
             correct+=1
-        if count > num_samples:
+        else:
             print('incorrect')
+        if num_samples<count:
             break
     print('Accuracy: ' + str(100*(correct/count))+'%')
 
 
 def main():
     typos,wordlist = createTypos()
-    eval(typos, wordlist, 100)
+    eval(typos, wordlist, 5)
 
             
 
