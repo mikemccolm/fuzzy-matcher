@@ -2,7 +2,7 @@ from nltk.corpus import words
 import nltk
 import random
 from typing import Tuple
-
+import random
 import sys
 sys.path.append('../fuzzy-matcher')
 import matching
@@ -74,6 +74,12 @@ def createTypos(error_rate:float=0.08)->Tuple[dict[str],list[str]]:
     typos = scramble_words(wordlist,mappings, error_rate)
     return typos, wordlist
 
+def rearrangeDictionary(typos: dict, seed:int=1)->dict[str]:
+    l = list(typos.items())
+    random.Random(seed).shuffle(l)
+    d_shuffled = dict(l)
+    return d_shuffled
+
 def getmatches(typos: dict, wordlist: list[str], num_samples: int)->float:
     results = []
     count = 0
@@ -89,6 +95,7 @@ def getmatches(typos: dict, wordlist: list[str], num_samples: int)->float:
 def eval(results):
     correct = 0
     for result in results:
+        print(result['original'])
         if (result['predicted']==result['expected']):
             print('correct')
             correct+=1
@@ -97,8 +104,9 @@ def eval(results):
     print('Accuracy: ' + str(100*(correct/len(results)))+'%')
     
 def main():
-    typos,wordlist = createTypos(0.6)
-    preds = getmatches(typos, wordlist, 8)
+    typos,wordlist = createTypos(0.1)
+    typos = rearrangeDictionary(typos,random.randint(0,999999))
+    preds = getmatches(typos, wordlist, 2)
     eval(preds)
 
             
