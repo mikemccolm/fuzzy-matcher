@@ -80,13 +80,25 @@ def rearrangeDictionary(typos: dict, seed:int=1)->dict[str]:
     d_shuffled = dict(l)
     return d_shuffled
 
-def getmatches(typos: dict, wordlist: list[str], num_samples: int)->float:
+def getmatches(typos: dict, wordlist: list[str], num_samples: int, lev: bool=True, tve: bool=True)->float:
     results = []
     count = 0
     for item in typos.items():
         count +=1
-        output = matching.match_levenshtein(item[0],wordlist)
-        record = {"original":item[0], "predicted":item[1], "expected":output}
+        record = {"original":item[0], "expected":item[1]}
+
+        if lev:
+            lev_output = matching.match_levenshtein(record['original'],wordlist)
+        else:
+            lev_output = None
+        record['predicted_lev'] = lev_output
+
+        if tve:
+            tve_output = matching.match_tversky(record['original'],wordlist)
+        else:
+            tve_output = None
+        record['predicted_tve'] = tve_output
+        
         results.append(record)
         if count >= num_samples:
             break
@@ -95,8 +107,9 @@ def getmatches(typos: dict, wordlist: list[str], num_samples: int)->float:
 def eval(results):
     correct = 0
     for result in results:
+        print(result)
         print(result['original'])
-        if (result['predicted']==result['expected']):
+        if (result['predicted_lev']==result['expected']):
             print('correct')
             correct+=1
         else:
