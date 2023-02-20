@@ -90,6 +90,7 @@ def eval(typos: dict, wordlist: list[str], num_samples: int)->float:
             break
     print('Accuracy: ' + str(100*(correct/count))+'%')
 
+#split eval into multiple match functions?
 
 def main():
     typos,wordlist = createTypos()
