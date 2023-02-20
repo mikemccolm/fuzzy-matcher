@@ -67,34 +67,39 @@ def scramble_words(words: list[str],mappings:dict, error_rate:float=0.08)->dict[
             typos[new_word]=word
     return typos
 
-def createTypos()->Tuple[dict[str],list[str]]:
+def createTypos(error_rate:float=0.08)->Tuple[dict[str],list[str]]:
     mappings = getmappings()
     nltk.download('words')
     wordlist = [word.lower() for word in words.words() if ((len(word)>5)and word.isalpha())]
-    typos = scramble_words(wordlist,mappings)
+    typos = scramble_words(wordlist,mappings, error_rate)
     return typos, wordlist
 
-def eval(typos: dict, wordlist: list[str], num_samples: int)->float:
+def getmatches(typos: dict, wordlist: list[str], num_samples: int)->float:
+    results = []
     count = 0
-    correct = 0
     for item in typos.items():
-        count+=1
+        count +=1
         output = matching.match_levenshtein(item[0],wordlist)
-        print(item)
-        if (str(output)==str(item[1])):
+        record = {"original":item[0], "predicted":item[1], "expected":output}
+        results.append(record)
+        if count >= num_samples:
+            break
+    return results
+
+def eval(results):
+    correct = 0
+    for result in results:
+        if (result['predicted']==result['expected']):
             print('correct')
             correct+=1
         else:
             print('incorrect')
-        if num_samples<count:
-            break
-    print('Accuracy: ' + str(100*(correct/count))+'%')
-
-#split eval into multiple match functions?
-
+    print('Accuracy: ' + str(100*(correct/len(results)))+'%')
+    
 def main():
-    typos,wordlist = createTypos()
-    eval(typos, wordlist, 5)
+    typos,wordlist = createTypos(0.6)
+    preds = getmatches(typos, wordlist, 8)
+    eval(preds)
 
             
 
