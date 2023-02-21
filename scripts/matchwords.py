@@ -80,24 +80,32 @@ def rearrangeDictionary(typos: dict, seed:int=1)->dict[str]:
     d_shuffled = dict(l)
     return d_shuffled
 
-def getmatches(typos: dict, wordlist: list[str], num_samples: int, lev: bool=True, tve: bool=True)->float:
+def getmatches(typos: dict, wordlist: list[str], num_samples: int, lev: bool=True, tve: bool=True, jw: bool=True)->list[str]:
     results = []
     count = 0
     for item in typos.items():
         count +=1
         record = {"original":item[0], "expected":item[1]}
-
+        #include levenshtein distance
         if lev:
             lev_output = matching.match_levenshtein(record['original'],wordlist)
         else:
             lev_output = None
         record['predicted_lev'] = lev_output
 
+        #include tversky index
         if tve:
             tve_output = matching.match_tversky(record['original'],wordlist)
         else:
             tve_output = None
         record['predicted_tve'] = tve_output
+
+        #include jaro-winkler similarity
+        if jw:
+            jw_output = matching.match_jw(record['original'],wordlist)
+        else:
+            jw_output = None
+        record['predicted_jw'] = jw_output
         
         results.append(record)
         if count >= num_samples:
@@ -105,21 +113,27 @@ def getmatches(typos: dict, wordlist: list[str], num_samples: int, lev: bool=Tru
     return results
 
 def eval(results):
-    correct = 0
-    for result in results:
-        print(result)
-        print(result['original'])
-        if (result['predicted_lev']==result['expected']):
-            print('correct')
-            correct+=1
-        else:
-            print('incorrect')
-    print('Accuracy: ' + str(100*(correct/len(results)))+'%')
+    if results:
+        active_lev = True if results[0]['predicted_lev'] is not None else False
+        active_jw = True if results[0]['predicted_jw'] is not None else False
+        active_tve = True if results[0]['predicted_tve'] is not None else False
+        if active_lev:
+            lev_correct = [x for x in results if x['predicted_lev']==x['expected']]
+            print('Levenshtein Accuracy: ' + str(100*(len(lev_correct)/len(results)))+'%')
+        if active_jw:
+            jw_correct = [x for x in results if x['predicted_jw']==x['expected']]
+            print('Jaro-Winkler Accuracy: ' + str(100*(len(jw_correct)/len(results)))+'%')
+        if active_tve:
+            tve_correct = [x for x in results if x['predicted_tve']==x['expected']]
+            print('Tversky Accuracy: ' + str(100*(len(tve_correct)/len(results)))+'%')
+        return
+    else:
+        print('No predictions were made.')
     
 def main():
     typos,wordlist = createTypos(0.1)
     typos = rearrangeDictionary(typos,random.randint(0,999999))
-    preds = getmatches(typos, wordlist, 2)
+    preds = getmatches(typos, wordlist, 25)
     eval(preds)
 
             
