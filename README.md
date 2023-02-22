@@ -1,9 +1,10 @@
 # fuzzy-matcher
 Playground for experimenting with fuzzy matching techniques
 
-#Setup
+##### Setup
+```
 pip install -r requirements.txt
-
+```
 ##### School Matching
 School list in /data
 misc/school_matcher matches to school list based on Levenshtein distance
